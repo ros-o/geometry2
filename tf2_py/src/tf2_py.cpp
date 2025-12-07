@@ -396,27 +396,19 @@ static PyObject *lookupTwistFullCore(PyObject *self, PyObject *args)
 static inline int checkTranslationType(PyObject* o)
 {
   PyTypeObject *translation_type = (PyTypeObject*) PyObject_GetAttrString(pModulegeometrymsgs, "Vector3");
-  int type_check = PyObject_TypeCheck(o, translation_type);
   int attr_check = PyObject_HasAttrString(o, "x") &&
                    PyObject_HasAttrString(o, "y") &&
                    PyObject_HasAttrString(o, "z");
-  if (!type_check) {
-    PyErr_WarnEx(PyExc_UserWarning, "translation should be of type Vector3", 1);
-  }
   return attr_check;
 }
 
 static inline int checkRotationType(PyObject* o)
 {
   PyTypeObject *rotation_type = (PyTypeObject*) PyObject_GetAttrString(pModulegeometrymsgs, "Quaternion");
-  int type_check = PyObject_TypeCheck(o, rotation_type);
   int attr_check = PyObject_HasAttrString(o, "w") &&
                    PyObject_HasAttrString(o, "x") &&
                    PyObject_HasAttrString(o, "y") &&
                    PyObject_HasAttrString(o, "z");
-  if (!type_check) {
-    PyErr_WarnEx(PyExc_UserWarning, "rotation should be of type Quaternion", 1);
-  }
   return attr_check;
 }
 
@@ -472,6 +464,7 @@ static PyObject *setTransformStatic(PyObject *self, PyObject *args)
   if (!PyArg_ParseTuple(args, "Os", &py_transform, &authority))
     return NULL;
 
+  // TODO: check for existance of all fields before borrowing them, otherwise this segfaults on wrong input!
   geometry_msgs::TransformStamped transform;
   PyObject *header = pythonBorrowAttrString(py_transform, "header");
   transform.child_frame_id = stringFromPython(pythonBorrowAttrString(py_transform, "child_frame_id"));
